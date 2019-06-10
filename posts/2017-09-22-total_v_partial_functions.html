@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Brad Bow</title>
+        <link rel="stylesheet" href="../css/default.css" />
+        <link href="https://fonts.googleapis.com/css?family=Cardo|Noto+Serif|PT+Serif|Source+Serif+Pro|Vollkorn" rel="stylesheet">
+        <link rel="stylesheet" href="../css/prism.css" />
+    </head>
+    <body>
+        <header>
+            <div class="logo">
+                <a href="../">Brad Bow</a>
+            </div>
+            <nav>
+                <a href="../">Posts</a>
+                <a href="../about.html">About</a>
+                <a href="../misc.html">Misc</a>
+            </nav>
+        </header>
+
+        <main role="main">
+            <h1>Why you should totally avoid partial functions</h1>
+            <article>
+    <section class="header">
+        Posted on September 22, 2017
+        
+    </section>
+    <section>
+        <h1 id="tldr">TL;DR</h1>
+<blockquote>
+<p><strong>Functions</strong> map values from their <strong>domain</strong> to values in their <strong>co-domain</strong>. <strong>Total</strong> functions have a total mapping between their domain and co-domain. <strong>Partial</strong> functions do not. This makes code that uses them hard to reason about and prone to bugs. Functions that throw exceptions are perfect examples of partial functions and their effect on reasonability.</p>
+</blockquote>
+<h2 id="functions-domains-and-co-domains">Functions, domains, and co-domains</h2>
+<p>Remember when you learnt about functions in high school maths? Neither do I. Oh well, let’s just learn it again.</p>
+<p>A <strong>function</strong> maps inputs to outputs.</p>
+<pre><code class="language-csharp">f(x) = x + 1      // where x is an integer
+g(x,y) = x * y    // where x and y are both integers
+</code></pre>
+<p><code>f</code> is a function that maps an integer to another integer by adding one to it. <code>g</code> is a function that maps two integers to another integer by multiplying them together.</p>
+<p>The set of values that a function can take as inputs is called it’s <strong>domain</strong>. The set of values that a function can return is called it’s <strong>co-domain</strong>. So the domain of our <code>f</code> function is the set of all integers and it’s co-domain is also the set of all integers. The domain for the <code>g</code> function is the set of all pairs of integers, (x,y), and it’s co-domain is the set of all integers.</p>
+<p>So <strong>functions</strong> map values from their <strong>domain</strong> to values in their <strong>co-domain</strong>.</p>
+<p>Now that we have learnt (or re-learnt) what functions are, let’s look at what it means for a function to be <em>partial</em>.</p>
+<h2 id="can-a-function-lie">Can a function … lie?</h2>
+<p>Looking at our <code>f</code> and <code>g</code> functions above it is hard to imagine a way to ‘break’ them. What integer could we possibly pass to <code>f</code> such that there was no way for the expression <code>x + 1</code> to evaluate to another integer?</p>
+<p>When it comes to programming though, it is very easy to ‘break’ most functions we write. Particularly in languages that support throwing exceptions. Anything can break, at any time. Consider the following C# code.</p>
+<pre><code class="language-csharp">public decimal AddProductToCart(int productId)
+{
+  var product = _productLookup.Lookup(productId);
+  if(product == null)
+    throw new ArgumentException(nameof(productId));
+
+  _cart.Add(product);
+  return _cart.CalculateCartValue();
+}
+</code></pre>
+<p>The domain of the <code class="language-csharp">AddProductToCart</code> function is all integers (or at least all 32-bit integers). It’s co-domain is the set of values that populate the C# <code>decimal</code> type. But <code>AddProductToCart</code> will only return a value from it’s co-domain for some special set of values from it’s domain. When the <code>productId</code> does not resolve to an existing product an exception is thrown and no value is returned at all. This makes <code>AddProductToCart</code> a <strong>partial</strong> function.</p>
+<blockquote>
+<p>Partial functions are functions that do not map every value in their domain to a value in their co-domain.</p>
+</blockquote>
+<p>So what’s the problem?</p>
+<p>Well, the problem is that <strong>the function is a lie</strong>. It told me that if I give it an integer I will get a decimal back. It promised. And it let me down. How can I ever trust a function again?</p>
+<p>So what’s to be done? How can we mend this relationship?</p>
+<h2 id="getting-the-trust-back">Getting the trust back</h2>
+<p>We mend the relationship by getting the trust back. And we get the trust back by not lying to each other. With regard to our <code>AddProductToCart</code> function above the lie was that it returned a decimal. The <em>truth</em> is that it returns <em>either</em> a decimal or some form of error (in our case an <code>Exception</code>). So let’s tell the truth.</p>
+<pre><code class="language-csharp">public Either<Exception, decimal> TrustworthyAddProductToCart(
+    int productId
+)
+{
+  try
+  {
+    var product = _productLookup.Lookup(productId);
+    if(product == null)
+    {
+      throw new ArgumentException(nameof(productId));
+    }
+    _cart.Add(product);
+    return Either<Exception, decimal>.Right(_cart.CalculateCartValue());
+  }
+  catch(Exception e)
+  {
+    return Either<Exception, decimal>.Left(e);
+  }
+}
+</code></pre>
+<p>Instead of letting an exception escape, <code>TrustworthyAddProductToCart</code> catches it and returns it inside the the <code>Either</code> type. This is a type that encapsulates the idea that a value can have one of two types, typically referred to as the <code>Left</code> and <code>Right</code>. Any code that calls <code>TrustworthyAddProductToCart</code> knows that it must handle both the error case and the success case (i.e. the <code>Left</code> and <code>Right</code> ‘branches’). This information is right there in the signature. It’s honest.</p>
+<p>The domain of the <code>TrustworthyAddProductToCart</code> is still 32-bit integers but the co-domain is now represented by the <code>Either&lt;Exception, decimal&gt;</code> type. You can’t call <code>TrustworthyAddProductToCart</code> with any value in it’s domain (<code>int</code>) and fail to get back a value in it’s co-domain (<code>Either&lt;Exception, decimal&gt;</code>). This makes it a <strong>total function</strong>.</p>
+<blockquote>
+<p>Total functions are functions that map every value in their domain to a value in their co-domain.</p>
+</blockquote>
+<p>Save your lies for people and keep your functions honest (i.e. <strong>total</strong>).</p>
+    </section>
+</article>
+
+        </main>
+
+        <footer>
+            Site proudly generated by
+            <a href="https://jaspervdj.be/hakyll">Hakyll</a>,
+            src on
+            <a href="https://github.com">GitHub</a>
+
+        </footer>
+
+      <script src="../js/prism.js"></script>
+    </body>
+</html>

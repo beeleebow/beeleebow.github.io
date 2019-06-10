@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Brad Bow</title>
+        <link rel="stylesheet" href="../css/default.css" />
+        <link href="https://fonts.googleapis.com/css?family=Cardo|Noto+Serif|PT+Serif|Source+Serif+Pro|Vollkorn" rel="stylesheet">
+        <link rel="stylesheet" href="../css/prism.css" />
+    </head>
+    <body>
+        <header>
+            <div class="logo">
+                <a href="../">Brad Bow</a>
+            </div>
+            <nav>
+                <a href="../">Posts</a>
+                <a href="../about.html">About</a>
+                <a href="../misc.html">Misc</a>
+            </nav>
+        </header>
+
+        <main role="main">
+            <h1>How to express yourself without effecting others</h1>
+            <article>
+    <section class="header">
+        Posted on August 30, 2017
+        
+    </section>
+    <section>
+        <h2 id="tldr">TL;DR</h2>
+<p>Most programmers build programs out of a mix of expressions (things that can be evaluated to produce a value, e.g. <code>5 + 7</code>) and statements (imperative instructions to a machine, e.g. <code>printLine &quot;hello world&quot;</code>). While this seems like a sane and flexible approach, it comes at the cost of “reasonability”. This is because statements hide side-effects, which are the the mortal enemies of clarity and determinism.</p>
+<h2 id="so-whats-the-difference">So what’s the difference?</h2>
+<p>An <strong>expression</strong> is a composition of values and sub-expressions which, upon <em>evaluation</em>, reduces to a single value. Let’s take some simple mathematical examples.</p>
+<pre class="line-numbers"><code class="language-csharp">5 + 7
+3 * (4 - 1)
+7*x + 5
+</code></pre>
+<p>Example 1 is a <em>simple</em> expression, meaning there is only one evaluation needed to produce a value, in this case <code>12</code>. The second example is a <em>compound</em> expression because it is composed of two simple sub-expressions. First, we evaluate <code>4-1</code>, then we multiply that value with <code>3</code>. Finally, example 3 is a <em>parameterised, compound</em> expression. Given a value for <code>x</code> (the parameter) we can evaluate <code>7*x</code> then add <code>5</code> to this value.</p>
+<p>A <strong>statement</strong> does not produce a value. It is an imperative instruction to the machine to do something. Let’s have a look at some familiar statements.</p>
+<pre id="ex1"><code class="language-csharp">var x = 1;
+
+Console.WriteLine("I am a statement");
+
+_logger.Info("I am a side-effect. Boo!");
+
+var firstInteger = -1;
+
+if(_listOfIntegers.Length > 0){
+  firstInteger = _listOfIntegers[0];
+}
+</code></pre>
+<p><code class="language-csharp">var x = 1;</code> is a statement (i.e. the <em>assignment</em> statement). It says: “Give me enough memory to hold an integer, put the value <code>1</code> into that memory, and address the memory as <code class="language-csharp">x</code> so I can refer to it later”. Writing to the Console or logging are also statements. You don’t get values back from running them. The <code class="language-csharp">if</code> construct in most languages executes blocks of statements if a certain predicate (i.e. an <em>expression</em> that evaluates to a <code class="language-csharp">bool</code>) is true.</p>
+<h2 id="so-whats-the-problem">So what’s the problem?</h2>
+<p>If you want to be able to easily and consistently reason about your program, then side effects should be treated with caution. This is probably worthy of it’s own post, but for now let’s accept the premise that side effects are somewhat undesirable.</p>
+<p>The problem, then, is that statements are <strong>always side-effecting</strong>. Think about it. How can you possibly have a statement that doesn’t have a side effect? It has to do <em>something</em>, and it doesn’t produce a value…</p>
+<p>In most programming languages expressions may or may not produce a side effect. Consider the following C# code.</p>
+<pre id="ex1"><code class="language-csharp">public int PureAdd(int x, int y)
+{
+  return x + y;
+}
+
+public int ImpureAdd(int x, int y)
+{
+  Console.WriteLine($"Adding {x} and {y}");
+  return x + y;
+}
+</code></pre>
+<p>Invocations of both <code class="language-csharp">PureAdd</code> and <code class="language-csharp">ImpureAdd</code> are expressions because they produce values. Evaluation of <code class="language-csharp">ImpureAdd</code>, however, also produces the side effect of writing a message to the console. Notice how the side effect is achieved though? Thats right, via a statement.</p>
+<blockquote>
+<p>As an aside, a “pure” functional programming language is one that has only expressions and does not permit side effects. Programs written in these languages are simply the composition of smaller expressions into a single compound expression (i.e. the “program”).</p>
+</blockquote>
+<h2 id="so-whats-the-take-away">So what’s the take away?</h2>
+<p>Try to build as much of your program as you can out of pure expressions and limit the use of statements. Here are a few tips:</p>
+<ul>
+<li><strong>Don’t write <code>void</code> methods/functions.</strong> A method/function that doesn’t return anything is just another statement. Your programming language probably has enough of those already. You don’t need to be adding more.</li>
+<li><strong>Side effects at the edges, pure in the middle</strong> The reality is that your program needs to perform side effects to be useful. At some point you’ll need to read from a database or write to a response stream. Don’t let these concerns pollute your entire program. Fence them off as soon as you can and keep those side effects out or your pure application logic.</li>
+<li><strong>Avoid mutation.</strong> Mutation destroys determinism. That is, you can’t expect the same output for the same inputs every time if things are being changed along the way.</li>
+<li><strong>Replace control flow structures and error handling with type driven alternatives.</strong> Instead of having a <code>Person</code> object that can be null represent the nullability in a type, e.g. <code>Option&lt;Person&gt;</code>. Instead of throwing an exception, represent that an evaluation might fail in a type, e.g. <code>Either&lt;Exception, Person&gt;</code>.</li>
+</ul>
+<p>Go forth and express yourself.</p>
+    </section>
+</article>
+
+        </main>
+
+        <footer>
+            Site proudly generated by
+            <a href="https://jaspervdj.be/hakyll">Hakyll</a>,
+            src on
+            <a href="https://github.com">GitHub</a>
+
+        </footer>
+
+      <script src="../js/prism.js"></script>
+    </body>
+</html>

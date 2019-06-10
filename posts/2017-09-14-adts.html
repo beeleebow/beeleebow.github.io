@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Brad Bow</title>
+        <link rel="stylesheet" href="../css/default.css" />
+        <link href="https://fonts.googleapis.com/css?family=Cardo|Noto+Serif|PT+Serif|Source+Serif+Pro|Vollkorn" rel="stylesheet">
+        <link rel="stylesheet" href="../css/prism.css" />
+    </head>
+    <body>
+        <header>
+            <div class="logo">
+                <a href="../">Brad Bow</a>
+            </div>
+            <nav>
+                <a href="../">Posts</a>
+                <a href="../about.html">About</a>
+                <a href="../misc.html">Misc</a>
+            </nav>
+        </header>
+
+        <main role="main">
+            <h1>Rethinking Data Types, Algebraically</h1>
+            <article>
+    <section class="header">
+        Posted on September 14, 2017
+        
+    </section>
+    <section>
+        <h1 id="tldr">TL;DR</h1>
+<p><em><strong>Algebraic data types</strong> (ADTs) are types that are created from combining “sum” and “product” types. Sum types are inhabited by a distinct set of alternate values (think enumerations) and product types are inhabited by all the possible combinations of the composite parts (think tuples, records, or structs). While these concepts are relevant in all programming languages and paradigms, ADTs hold a central place in functional programming and are represented elegantly in Haskell.</em></p>
+<h2 id="hey-that-sounds-like-math">Hey! That sounds like Math!</h2>
+<p>If you’re a programmer you are probably fine with the “Data Types” part. You may even be fine with the “Rethinking” part. The “Algebraically” part might have you running for the hills though. I don’t know why. They have math in the hills. They aren’t animals. Anyway, you needn’t fear, there will be precious little math in this post. We do need to cover one thing super quickly though. We need some basic understanding of an <strong>algebra</strong>. This is convenient because a basic understanding is all I have.</p>
+<p>For the purposes of this post:</p>
+<blockquote>
+<p>An algebra consists of a set of <strong>things</strong> along with a set of <strong>operations on those things</strong>. In an algebra we build new things by passing existing things to the operations.</p>
+</blockquote>
+<p>For example, we could form an algebra where our “things” are integers and our “operations” are addition and multiplication. We can get the integer 3 by passing 2 and 1 to the addition operation, i.e. <code>3 = 2 + 1</code>. We can get the integer 16 by passing 2 and 8 to the multiplication operation, i.e. <code>16 = 2 * 8</code>.</p>
+<p>Not that scary after all, right?</p>
+<h2 id="example-time">Example Time!</h2>
+<p>Here is some Haskell.</p>
+<script src="https://gist.github.com/beeleebow/c3fe1f3ca653e980ec3279af97d0f75c.js"></script>
+<p>For the uninitiated, here is a basic overview:</p>
+<ul>
+<li>We define two types, <code>Department</code> and <code>EmployeeClassification</code>, which can each be constructed by using one of a choice of <em>data constructors</em>. In this case the data constructors are all parameter-less, effectively making these types enumerations.</li>
+<li>We declare a tuple, (<code>Department</code>, <code>EmployeeClassification</code>), which represents a full time employee that works in the Engineering department.</li>
+</ul>
+<p>With that basic explanation out of the way, let’s ask ourselves a few questions.</p>
+<ol type="1">
+<li>How many inhabitants (i.e. distinct values) of the <code>Department</code> type are there?</li>
+<li>How many inhabitants of the <code>EmployeeClassification</code> type are there?</li>
+<li>How many inhabitants of the <code>(Department, EmployeeClassification)</code> type are there? That is, how many combinations of <code>Department</code> and <code>EmployeeClassification</code> exist?</li>
+</ol>
+<p>Questions 1 and 2 are easy enough to answer. We can just count the number of data constructors. Put another way, replace every data constructor with a 1, then <strong>sum</strong> the ones. So for the <code>Department</code> type we have <code>Engineering | Marketing | Research ===&gt; 1 + 1 + 1 = 3</code>. Similarly, for the <code>EmployeeClassification</code> type we have <code>FullTime | PartTime ===&gt; 1 + 1  = 2</code>.</p>
+<p>Question 3 requires a little bit of work to answer. We can enumerate all the options by hand (see below) <em>or</em> we can dust off that set theory textbook and recognize this as a <a href="https://en.wikipedia.org/wiki/Cartesian_product">cartesian <strong>product</strong></a> (or cross join in SQL parlance). That textbook would tell us that the cartesian product of a set that contains 3 elements (our <code>Department</code> type) and a set that contains 2 elements (our <code>EmployeeClassification</code> type), is 3 x 2 = 6, which matches what we get via our brute force method applied below.</p>
+<script src="https://gist.github.com/beeleebow/fd72f7117f78515e9395170da2222056.js"></script>
+<p>We have mentioned <strong>sums</strong> and <strong>products</strong>. They sure do sound like things that might be involved in algebra…</p>
+<h2 id="so-where-is-the-algebra">So, where is the algebra?</h2>
+<p>So we said that an algebra is the combination of a set of “things” and a set of operations that operate on those things. So how does this relate to <strong>Algebraic</strong> Data Types?</p>
+<p>Let’s say that the “things” in our algebra are <strong>types</strong>. What would our operations be? That is, how do we build <em>new</em> types from existing types? Well, we saw two ways of doing that.</p>
+<p>Firstly, we can define a type as something constructed by one of an alternate set of data constructors, e.g. <code>data Department = Engineering | Marketing | Research</code>. We also made the observation that the cardinality of this set can be calculated via a <strong>sum</strong> operation, i.e. counting the constructors. So, we could say that one of the operations that allow us to make new types is a “sum operation”, where the inhabitants of the new type are made up from the union of the alternate choices. Types constructed from sum operations are called <strong>sum types</strong>.</p>
+<p>Secondly, we saw that we can define a new type by <em>combining</em> other types, e.g. our <code>(Department, EmployeeClassification)</code> tuple. The inhabitants of this type are enumerated by applying a <strong>product operation</strong> (the cartesian product in set-theoretic terms) to the composite types. So, we could say that we were able to make a new type via the use of a “product operation”. Types constructed from product operations are called <strong>product types</strong>.</p>
+<p>In glorious conclusion, when we talk about Algebraic Data Types what we are referring to are composite types that are built from a combination of sum and product operations. Simples … right?</p>
+    </section>
+</article>
+
+        </main>
+
+        <footer>
+            Site proudly generated by
+            <a href="https://jaspervdj.be/hakyll">Hakyll</a>,
+            src on
+            <a href="https://github.com">GitHub</a>
+
+        </footer>
+
+      <script src="../js/prism.js"></script>
+    </body>
+</html>
