@@ -30,7 +30,10 @@
     </section>
     <section>
         <h2 id="tldr">TL;DR</h2>
-<p>Most programmers build programs out of a mix of expressions (things that can be evaluated to produce a value, e.g. <code>5 + 7</code>) and statements (imperative instructions to a machine, e.g. <code>printLine &quot;hello world&quot;</code>). While this seems like a sane and flexible approach, it comes at the cost of “reasonability”. This is because statements hide side-effects, which are the the mortal enemies of clarity and determinism.</p>
+<div class="tldr">
+<p>We typically build programs out of a mix of <strong>expressions</strong> and <strong>statements</strong>. Expressions can be <strong>evaluated</strong> to produce a value, e.g. <code class="language-csharp">5 + 7</code> produces <code class="language-csharp">12</code>. Statements do not produce values, they exist to have some effect (or side-effect), e.g. <code class="language-csharp">Console.Write(“Hello world”)</code>.</p>
+<p><strong>Preferring expressions over statements</strong> will result in easier to reason about, <strong>more honoest</strong> code.</p>
+</div>
 <h2 id="so-whats-the-difference">So what’s the difference?</h2>
 <p>An <strong>expression</strong> is a composition of values and sub-expressions which, upon <em>evaluation</em>, reduces to a single value. Let’s take some simple mathematical examples.</p>
 <pre class="line-numbers"><code class="language-csharp">5 + 7
