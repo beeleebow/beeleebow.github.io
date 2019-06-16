@@ -31,15 +31,18 @@
     <section>
         <h1 id="tldr">TL;DR</h1>
 <div class="tldr">
-<p><strong>Algebraic data types (ADTs)</strong> are types that are created from combining <strong>sum</strong> and <strong>product</strong> types. Sum types are inhabited by a distinct set of alternate values (think enumerations) and product types are inhabited by all the possible combinations of the composite parts (think tuples, records, or structs). While these concepts are relevant in all programming languages and paradigms, ADTs hold a central place in functional programming and are represented elegantly in Haskell.</p>
+<p><strong>Algebraic data types (ADTs)</strong> are types that are created from combining <strong>sum</strong> and <strong>product</strong> types.</p>
+<p>Sum types are inhabited by a distinct set of alternate values (think enumerations) and product types are inhabited by all the possible combinations of the composite parts (think tuples, records, or structs).</p>
+<p>While these concepts are relevant in all programming languages and paradigms, ADTs hold a central place in functional programming and are represented elegantly in Haskell.</p>
 </div>
 <h2 id="hey-that-sounds-like-math">Hey! That sounds like Math!</h2>
-<p>If you’re a programmer you are probably fine with the “Data Types” part. You may even be fine with the “Rethinking” part. The “Algebraically” part might have you running for the hills though. I don’t know why. They have math in the hills. They aren’t animals. Anyway, you needn’t fear, there will be precious little math in this post. We do need to cover one thing super quickly though. We need some basic understanding of an <strong>algebra</strong>. This is convenient because a basic understanding is all I have.</p>
+<p>If you’re a programmer you are probably fine with the “Data Types” part. You may even be fine with the “Rethinking” part. The “Algebraically” part might have you running for the hills though. I don’t know why. They have math in the hills. They aren’t animals.</p>
+<p>Anyway, you needn’t fear, there will be precious little math in this post. All we really need is a basic understanding of an <strong>algebra</strong>. This is convenient because a basic understanding is all I have.</p>
 <p>For the purposes of this post:</p>
 <blockquote>
-<p>An algebra consists of a set of <strong>things</strong> along with a set of <strong>operations on those things</strong>. In an algebra we build new things by passing existing things to the operations.</p>
+<p>An algebra consists of a set of <strong>objects</strong> along with a set of <strong>operations on those objects</strong>. In an algebra we build new objects by passing existing objects to the operations.</p>
 </blockquote>
-<p>For example, we could form an algebra where our “things” are integers and our “operations” are addition and multiplication. We can get the integer 3 by passing 2 and 1 to the addition operation, i.e. <code class="language-haskell">3 = 2 + 1</code>. We can get the integer 16 by passing 2 and 8 to the multiplication operation, i.e. <code class="language-haskell">16 = 2 * 8</code>.</p>
+<p>For example, we could form an algebra where our objects are integers and our operations are addition and multiplication. We can get the integer 3 by passing 2 and 1 to the addition operation, i.e. <code class="language-haskell">3 = 2 + 1</code>. We can get the integer 16 by passing 2 and 8 to the multiplication operation, i.e. <code class="language-haskell">16 = 2 * 8</code>.</p>
 <p>Not that scary after all, right?</p>
 <h2 id="example-time">Example Time!</h2>
 <p>Here is some Haskell.</p>
@@ -73,8 +76,8 @@ johnSmith = (Engineering, FullTime)
 </code></pre>
 <p>We have mentioned <strong>sums</strong> and <strong>products</strong>. They sure do sound like things that might be involved in algebra…</p>
 <h2 id="so-where-is-the-algebra">So, where is the algebra?</h2>
-<p>So we said that an algebra is the combination of a set of “things” and a set of operations that operate on those things. So how does this relate to <strong>Algebraic</strong> Data Types?</p>
-<p>Let’s say that the “things” in our algebra are <strong>types</strong>. What would our operations be? That is, how do we build <em>new</em> types from existing types? Well, we saw two ways of doing that.</p>
+<p>We said that an algebra is the combination of a set of objects and a set of operations that operate on those objects. So how does this relate to <strong>Algebraic</strong> Data Types?</p>
+<p>Let’s say that the objects in our algebra are <strong>types</strong>. What would our operations be? That is, how do we build <em>new</em> types from existing types? Well, we saw two ways of doing that.</p>
 <p>Firstly, we can define a type as something constructed by one of an alternate set of data constructors, e.g. <code class="language-haskell">data Department = Engineering | Marketing | Research</code>. We also made the observation that the cardinality of this set can be calculated via a <strong>sum</strong> operation, i.e. counting the constructors. So, we could say that one of the operations that allow us to make new types is a “sum operation”, where the inhabitants of the new type are made up from the union of the alternate choices. Types constructed from sum operations are called <strong>sum types</strong>.</p>
 <p>Secondly, we saw that we can define a new type by <em>combining</em> other types, e.g. our <code class="language-haskell">(Department, EmployeeClassification)</code> tuple. The inhabitants of this type are enumerated by applying a <strong>product operation</strong> (the cartesian product in set-theoretic terms) to the composite types. So, we could say that we were able to make a new type via the use of a “product operation”. Types constructed from product operations are called <strong>product types</strong>.</p>
 <p>In glorious conclusion, when we talk about Algebraic Data Types what we are referring to are composite types that are built from a combination of sum and product operations. Simples … right?</p>
