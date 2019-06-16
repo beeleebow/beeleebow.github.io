@@ -49,23 +49,23 @@ g(x,y) = x * y    // where x and y are both integers
 <pre><code class="language-csharp">public decimal CalculateAverageItemCost(Cart cart) =>
   cart.Items.Sum(i => i.Price) / cart.Items.Length;
 </code></pre>
-<p>The domain of the <code class="language-csharp">CalculateAverageItemCost</code> function is all the inhabitants of the <code>Cart</code> type. It’s co-domain is the set of values that populate the C# <code class="language-csharp">decimal</code> type. If we give this function a <code>Cart</code>, we get back a <code>decimal</code>. At least that’s what the signature says.</p>
-<p>But what about when <code>Cart.Items</code> is an empty collection?</p>
-<p>That’s right, a <code>DivideByZeroExcpetion</code> is thrown. Well, that signature isn’t worth the internet it’s written on. I’m sure you’ll agree that throwing an exception is hardly the same thing as returning a <code class="language-csharp">decimal</code>!</p>
-<p>This irresponsible behaviour makes <code class="language-csharp">CalculateAverageItemCost</code> a partial function. And the problem with partial functions is that they are <strong>lies</strong>. I was promised a <code>decimal</code> and I didn’t get one. How can I ever trust a function again?</p>
+<p>The domain of the <code class="language-csharp">CalculateAverageItemCost</code> function is all the inhabitants of the <code class="language-csharp">Cart</code> type. It’s co-domain is the set of values that populate the C# <code class="language-csharp">decimal</code> type. If we give this function a <code class="language-csharp">Cart</code>, we get back a <code class="language-csharp">decimal</code>. At least that’s what the signature says.</p>
+<p>But what about when <code class="language-csharp">Cart.Items</code> is an empty collection?</p>
+<p>That’s right, a <code class="language-csharp">DivideByZeroExcpetion</code> is thrown. Well, that signature isn’t worth the internet it’s written on. I’m sure you’ll agree that throwing an exception is hardly the same thing as returning a <code class="language-csharp">decimal</code>!</p>
+<p>This irresponsible behaviour makes <code class="language-csharp">CalculateAverageItemCost</code> a partial function. And the problem with partial functions is that they are <strong>lies</strong>. I was promised a <code class="language-csharp">decimal</code> and I didn’t get one. How can I ever trust a function again?</p>
 <blockquote>
 <p>When some values in a function’s domain are not mapped to values in its co-domain, then it is a <strong>partial function</strong>.</p>
 </blockquote>
 <h2 id="getting-back-to-total-trust">Getting back to Total Trust</h2>
 <p>There is nothing more sacred than the relationship between a programmer and his functions. We must mend this rift, lest we doom ourselves to a broken existence, full of pain and suffering.</p>
-<p>Let’s start with a healthy dose of honesty. <strong>There is no function we could write</strong> that returns a <code>decimal</code> output for every possible <code>Cart</code> input. It doesn’t exist, because a cart with no items in it doesn’t have a average per-item cost. We simply can’t satisfy this signature.</p>
-<p>This means we’ll need to change the signature to something we can satisfy. A promise we can actually keep, if you will. Our goal is to be able to map every input passed to <code>CalcualteAverageItemCost</code> to some output. We can achive this by expanding the output space (co-domain) or shrinking the input space (domain).</p>
-<p>Both of these approaches will allow us to map every input to an output, making our <code>CalculateAverageItemCost</code> a total function.</p>
+<p>Let’s start with a healthy dose of honesty. <strong>There is no function we could write</strong> that returns a <code class="language-csharp">decimal</code> output for every possible <code class="language-csharp">Cart</code> input. It doesn’t exist, because a cart with no items in it doesn’t have a average per-item cost. We simply can’t satisfy this signature.</p>
+<p>This means we’ll need to change the signature to something we can satisfy. A promise we can actually keep, if you will. Our goal is to be able to map every input passed to <code class="language-csharp">CalcualteAverageItemCost</code> to some output. We can achive this by expanding the output space (co-domain) or shrinking the input space (domain).</p>
+<p>Both of these approaches will allow us to map every input to an output, making our <code class="language-csharp">CalculateAverageItemCost</code> a total function.</p>
 <blockquote>
 <p>When every value in a function’s domain is mapped to a value in its co-domain, then it is a <strong>total function</strong>.</p>
 </blockquote>
 <h2 id="expanding-the-co-domain">Expanding the Co-domain</h2>
-<p>If we can’t guarantee that we can return a <code>decimal</code> output, what type of output could we guarantee? Well, we’d need a type that could model the presence of a <code>decimal</code> average (for when the cart has items), and the <strong>absence</strong> of an average (for when the cart is empty). Let’s call this type <code>Maybe&lt;decimal&gt;</code> and use it to rewrite our <code>CalculateAverageItemCost</code> function.</p>
+<p>If we can’t guarantee that we can return a <code class="language-csharp">decimal</code> output, what type of output could we guarantee? Well, we’d need a type that could model the presence of a <code class="language-csharp">decimal</code> average (for when the cart has items), and the <strong>absence</strong> of an average (for when the cart is empty). Let’s call this type <code class="language-csharp">Maybe<decimal></code> and use it to rewrite our <code class="language-csharp">CalculateAverageItemCost</code> function.</p>
 <pre><code class="language-csharp">public Maybe&lt;decimal&gt; CalculateAverageItemCost(
   Cart cart
 ) =>
@@ -73,22 +73,22 @@ g(x,y) = x * y    // where x and y are both integers
     ? Just(cart.Items.Sum(i => i.Price) / cart.Items.Length)
     : Empty;
 </code></pre>
-<p><code>Just</code> and <code>Empty</code> are both functions that return a value of type <code>Maybe&lt;decimal&gt;</code>. <code>Just</code> puts a decimal “inside” the <code>Maybe</code> structure while <code>Empty</code>, as the name suggests, represents the absence of a value.</p>
-<p>With these changes we’ve removed the possibility of throwing an exception by returning <code>Empty</code> instead. Of course, in C#, both <code>Cart</code> and <code>Cart.Items</code> could be null, in which case we’d be throwing exceptions again, but I’ve ignored those cases for the sake of a clear example.</p>
-<p>The point is that we have turned our partial function into a total function by conceptually expanding our co-domain from <code>decimal</code> to <code>Maybe&lt;decimal&gt;</code>.</p>
+<p><code class="language-csharp">Just</code> and <code class="language-csharp">Empty</code> are both functions that return a value of type <code class="language-csharp">Maybe<decimal></code>. <code class="language-csharp">Just</code> puts a decimal “inside” the <code class="language-csharp">Maybe</code> structure while <code class="language-csharp">Empty</code>, as the name suggests, represents the absence of a value.</p>
+<p>With these changes we’ve removed the possibility of throwing an exception by returning <code class="language-csharp">Empty</code> instead. Of course, in C#, both <code class="language-csharp">Cart</code> and <code class="language-csharp">Cart.Items</code> could be null, in which case we’d be throwing exceptions again, but I’ve ignored those cases for the sake of a clear example.</p>
+<p>The point is that we have turned our partial function into a total function by conceptually expanding our co-domain from <code class="language-csharp">decimal</code> to <code class="language-csharp">Maybe<decimal></code>.</p>
 <blockquote>
 <p>A partial function can be turned into a total function by <strong>expanding it’s co-domain</strong>.</p>
 </blockquote>
 <h2 id="shrinking-the-domain">Shrinking the Domain</h2>
 <p>We could also leave the function returning a decimal, and instead constrain the input (domain).</p>
-<p>In this case we’d need an input type that gives us a guarantee that the cart could never be empty. Let’s call this type <code>NonEmptyCart</code> and say that the <code>NonEmptyCart</code> API makes it impossible to construct a cart that has no items.</p>
+<p>In this case we’d need an input type that gives us a guarantee that the cart could never be empty. Let’s call this type <code class="language-csharp">NonEmptyCart</code> and say that the <code class="language-csharp">NonEmptyCart</code> API makes it impossible to construct a cart that has no items.</p>
 <p>With this new type under out belt we could rewrite out function once again.</p>
 <pre><code class="language-csharp">public decimal CalculateAverageItemCost(
   NonEmptyCart cart
 ) =>
   cart.Items.Sum(i => i.Price) / cart.Items.Length;
 </code></pre>
-<p>Here we’ve removed the possibility of the exception by limiting the inputs the function can take. This means we can use the function in less places, since <code>NonEmptyCart</code> is a more constrained type than <code>Cart</code>, but this is a small price to pay for being sure that you can use it safely.</p>
+<p>Here we’ve removed the possibility of the exception by limiting the inputs the function can take. This means we can use the function in less places, since <code class="language-csharp">NonEmptyCart</code> is a more constrained type than <code class="language-csharp">Cart</code>, but this is a small price to pay for being sure that you can use it safely.</p>
 <blockquote>
 <p>A partial function can be turned into a total function by <strong>shrinking it’s domain</strong>.</p>
 </blockquote>
