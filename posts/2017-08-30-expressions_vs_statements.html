@@ -31,34 +31,29 @@
     <section>
         <h2 id="tldr">TL;DR</h2>
 <div class="tldr">
-<p>We typically build programs out of a mix of <strong>expressions</strong> and <strong>statements</strong>. Expressions can be <strong>evaluated</strong> to produce a value, e.g. <code class="language-csharp">5 + 7</code> produces <code class="language-csharp">12</code>. Statements do not produce values, they exist to have some effect (or side-effect), e.g. <code class="language-csharp">Console.Write(“Hello world”)</code>.</p>
-<p><strong>Preferring expressions over statements</strong> will result in easier to reason about, <strong>more honoest</strong> code.</p>
+<p>We typically build programs out of a mix of <strong>expressions</strong> and <strong>statements</strong>. Expressions can be <strong>evaluated</strong> to produce a value, e.g. <code class="language-csharp">5 + 7</code> produces <code class="language-csharp">12</code>. Statements do not produce values, they exist to have some effect (or side-effect), e.g. <code class="language-csharp">Console.Write(“I am a statement.”)</code>.</p>
+<p><strong>Preferring expressions over statements</strong> will result in code that is easier to reason about.</p>
 </div>
 <h2 id="so-whats-the-difference">So what’s the difference?</h2>
-<p>An <strong>expression</strong> is a composition of values and sub-expressions which, upon <em>evaluation</em>, reduces to a single value. Let’s take some simple mathematical examples.</p>
+<p>An <strong>expression</strong> is a composition of values and sub-expressions which, upon <em>evaluation</em>, reduce to a single value. Let’s take some simple mathematical examples.</p>
 <pre><code class="language-csharp">5 + 7
 3 * (4 - 1)
 7*x + 5
 </code></pre>
-<p>Example 1 is a <em>simple</em> expression, meaning there is only one evaluation needed to produce a value, in this case <code class="language-csharp">12</code>. The second example is a <em>compound</em> expression because it is composed of two simple sub-expressions. First, we evaluate <code class="language-csharp">4 - 1</code>, then we multiply that value with <code class="language-csharp">3</code>. Finally, example 3 is a <em>parameterised, compound</em> expression. Given a value for <code class="language-csharp">x</code> (the parameter) we can evaluate <code class="language-csharp">7 * x</code> then add <code class="language-csharp">5</code> to this value.</p>
-<p>A <strong>statement</strong> does not produce a value. It is an imperative instruction to the machine to do something. Let’s have a look at some familiar statements.</p>
-<pre id="ex1"><code class="language-csharp">var x = 1;
-
-Console.WriteLine("I am a statement");
+<p>Example 1 is an expression that requires a single evaluation to produce a value, in this case <code class="language-csharp">12</code>. The second example requires two evaulations. First, we evaluate <code class="language-csharp">4 - 1</code>, then we multiply that value with <code class="language-csharp">3</code>. We see a <em>parameterised</em> expression in example 3. Given a value for <code class="language-csharp">x</code> (the parameter) we can evaluate <code class="language-csharp">7 * x</code> then add <code class="language-csharp">5</code> to this value (1 substitution, followed by 2 evaluations).</p>
+<p>A <strong>statement</strong>, on the other hand, does not produce a value. It is an imperative instruction to the machine to do something. Let’s have a look at some familiar statements.</p>
+<pre id="ex1"><code class="language-csharp">Console.WriteLine("I am a statement");
 
 _logger.Info("I am a side-effect. Boo!");
 
 var firstInteger = -1;
-
 if(_listOfIntegers.Length > 0){
   firstInteger = _listOfIntegers[0];
 }
 </code></pre>
-<p><code class="language-csharp">var x = 1;</code> is a statement (i.e. the <em>assignment</em> statement). It says: “Give me enough memory to hold an integer, put the value <code class="language-csharp">1</code> into that memory, and address the memory as <code class="language-csharp">x</code> so I can refer to it later”. Writing to the Console or logging are also statements. You don’t get values back from running them. The <code class="language-csharp">if</code> construct in most languages executes blocks of statements if a certain predicate (i.e. an <em>expression</em> that evaluates to a <code class="language-csharp">bool</code>) is true.</p>
-<h2 id="so-whats-the-problem">So what’s the problem?</h2>
-<p>If you want to be able to easily and consistently reason about your program, then side effects should be treated with caution. This is probably worthy of it’s own post, but for now let’s accept the premise that side effects are somewhat undesirable.</p>
-<p>The problem, then, is that statements are <strong>always side-effecting</strong>. Think about it. How can you possibly have a statement that doesn’t have a side effect? It has to do <em>something</em>, and it doesn’t produce a value…</p>
-<p>In most programming languages expressions may or may not produce a side effect. Consider the following C# code.</p>
+<p>Writing to the Console or logging are statements because you don’t get values back from running them. The <code class="language-csharp">if</code> construct in most languages executes blocks of statements if a certain predicate (i.e. an <em>expression</em> that evaluates to a <code class="language-csharp">bool</code>) is true.</p>
+<h2 id="whats-the-problem">What’s the problem?</h2>
+<p>In most programming languages, the functions – probably more accurately called methods – end up mixing expressions and statements. Consider the following C# code.</p>
 <pre id="ex1"><code class="language-csharp">public int PureAdd(int x, int y)
 {
   return x + y;
@@ -70,17 +65,21 @@ public int ImpureAdd(int x, int y)
   return x + y;
 }
 </code></pre>
-<p>Invocations of both <code class="language-csharp">PureAdd</code> and <code class="language-csharp">ImpureAdd</code> are expressions because they produce values. Evaluation of <code class="language-csharp">ImpureAdd</code>, however, also produces the side effect of writing a message to the console. Notice how the side effect is achieved though? Thats right, via a statement.</p>
+<p>Invocations of <code class="language-csharp">PureAdd</code> and <code class="language-csharp">ImpureAdd</code> both produce values. Evaluation of <code class="language-csharp">ImpureAdd</code>, however, also produces the side effect of writing a message to the console. The effect is achieved by calling the <code>Console.WriteLine</code> method, which we can think of as a statement, since it doens’t return a value.</p>
+<p>Now let’s imagine that we, correctly, realise that having our own method for adding two <code>int</code> values is silly and decide to replace any usage of our method with the built in <code>+</code> operator. To rectify this, we’ll just do a regex-based find and replace across all our source files.</p>
+<p>If we’ve used <code>PureAdd</code> then our regex would replace <code>PureAdd(x, y)</code> with <code>x + y</code>. When we run our program after this change, nothing will actually be different. We won’t produce any new output, or change the results in any way.</p>
+<p>However, if we’ve used <code>ImpureAdd</code> then our regex would replace <code>ImpureAdd(x, y)</code> with <code>x + y</code>. This will result in the same produced value, but we would have changed our program’s output. The program that called <code>ImpureAdd(x, y)</code> would have been producing console output, because of the <code>Console.WriteLine</code>. The program that inlines <code>x + y</code> will not produce this output. By making what seems to be a like-for-like substitution, we’ve actually changed the behaviour or our running program.</p>
+<p>We’ve all worked on code bases that seem to get harder and harder to change over time. This is due, in large part, to an accumlation of hard-to-discover side-effects. I change code over here, and now code over here is broken. One of the main causes of this state of affairs is the over-use of statements, because statements are <strong>always side-effecting</strong> (except for silly examples like empty <code>if</code> blocks). Think about it. How can you possibly have a statement that doesn’t have a side effect? It has to do <em>something</em>, and it doesn’t produce a value.</p>
 <blockquote>
-<p>As an aside, a “pure” functional programming language is one that has only expressions and does not permit side effects. Programs written in these languages are simply the composition of smaller expressions into a single compound expression (i.e. the “program”).</p>
+<p>As an aside, a <em>pure</em> functional programming language is one that has only expressions, no statements (and therefore no side-effects).</p>
 </blockquote>
-<h2 id="so-whats-the-take-away">So what’s the take away?</h2>
+<h2 id="whats-the-take-away">What’s the take away?</h2>
 <p>Try to build as much of your program as you can out of pure expressions and limit the use of statements. Here are a few tips:</p>
 <ul>
 <li><strong>Don’t write <code class="language-csharp">void</code> methods/functions.</strong> A method/function that doesn’t return anything is just another statement. Your programming language probably has enough of those already. You don’t need to be adding more.</li>
 <li><strong>Side effects at the edges, pure in the middle</strong> The reality is that your program needs to perform side effects to be useful. At some point you’ll need to read from a database or write to a response stream. Don’t let these concerns pollute your entire program. Fence them off as soon as you can and keep those side effects out or your pure application logic.</li>
 <li><strong>Avoid mutation.</strong> Mutation destroys determinism. That is, you can’t expect the same output for the same inputs every time if things are being changed along the way.</li>
-<li><strong>Replace control flow structures and error handling with type driven alternatives.</strong> Instead of having a <code class="language-csharp">Person</code> object that can be null represent the nullability in a type, e.g. <code class="language-csharp">Option<Person></code>. Instead of throwing an exception, represent that an evaluation might fail in a type, e.g. <code class="language-csharp">Either&lt;Exception, Person&gt;</code>.</li>
+<li><strong>Replace control flow structures and error handling with type driven alternatives.</strong> Instead of having a <code class="language-csharp">Person</code> object that can be null, represent the nullability in a type, e.g. <code class="language-csharp">Option<Person></code>. Instead of throwing an exception, represent that an evaluation might fail in a type, e.g. <code class="language-csharp">Either&lt;Exception, Person&gt;</code>.</li>
 </ul>
 <p>Go forth and express yourself.</p>
     </section>
