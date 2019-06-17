@@ -57,7 +57,7 @@ g(x,y) = x * y    // where x and y are both integers
 <p>When some values in a function’s domain are not mapped to values in its co-domain, then it is a <strong>partial function</strong>.</p>
 </blockquote>
 <h2 id="getting-back-to-total-trust">Getting back to Total Trust</h2>
-<p>There is nothing more sacred than the relationship between a programmer and his functions. We must mend this rift, lest we doom ourselves to a broken existence, full of pain and suffering.</p>
+<p>There is nothing more sacred than the relationship between a programmer and their functions. We must mend this rift, lest we doom ourselves to a broken existence, full of pain and suffering.</p>
 <p>Let’s start with a healthy dose of honesty. <strong>There is no function we could write</strong> that returns a <code class="language-csharp">decimal</code> output for every possible <code class="language-csharp">Cart</code> input. It doesn’t exist, because a cart with no items in it doesn’t have a average per-item cost. We simply can’t satisfy this signature.</p>
 <p>This means we’ll need to change the signature to something we can satisfy. A promise we can actually keep, if you will. Our goal is to be able to map every input passed to <code class="language-csharp">CalcualteAverageItemCost</code> to some output. We can achive this by expanding the output space (co-domain) or shrinking the input space (domain).</p>
 <p>Both of these approaches will allow us to map every input to an output, making our <code class="language-csharp">CalculateAverageItemCost</code> a total function.</p>
@@ -71,7 +71,7 @@ g(x,y) = x * y    // where x and y are both integers
 ) =>
   cart.Items.Length > 0
     ? Just(cart.Items.Sum(i => i.Price) / cart.Items.Length)
-    : Empty;
+    : Empty();
 </code></pre>
 <p><code class="language-csharp">Just</code> and <code class="language-csharp">Empty</code> are both functions that return a value of type <code class="language-csharp">Maybe<decimal></code>. <code class="language-csharp">Just</code> puts a decimal “inside” the <code class="language-csharp">Maybe</code> structure while <code class="language-csharp">Empty</code>, as the name suggests, represents the absence of a value.</p>
 <p>With these changes we’ve removed the possibility of throwing an exception by returning <code class="language-csharp">Empty</code> instead. Of course, in C#, both <code class="language-csharp">Cart</code> and <code class="language-csharp">Cart.Items</code> could be null, in which case we’d be throwing exceptions again, but I’ve ignored those cases for the sake of a clear example.</p>
